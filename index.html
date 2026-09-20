@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Todo</title>
+<style>
+  :root {
+    --ink: #2b2620;
+    --paper: #f6f1e7;
+    --line: #d8cfbd;
+    --accent: #4a5d43;
+    --accent-soft: #e4e9df;
+    --done: #a89f8f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Georgia', 'Times New Roman', serif;
+    display: flex;
+    justify-content: center;
+    padding: 60px 20px;
+  }
+  .sheet {
+    width: 100%;
+    max-width: 480px;
+  }
+  h1 {
+    font-size: 2.2rem;
+    font-weight: normal;
+    margin: 0 0 4px;
+    letter-spacing: 0.5px;
+  }
+  .date {
+    font-size: 0.9rem;
+    color: #8a8071;
+    margin-bottom: 32px;
+  }
+  form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    background: white;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+  input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  button {
+    padding: 12px 20px;
+    border: 1px solid var(--accent);
+    background: var(--accent);
+    color: white;
+    font-family: inherit;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  button:hover { background: #3c4c37; }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 4px;
+    border-bottom: 1px solid var(--line);
+  }
+  li .check {
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--accent);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--accent);
+  }
+  li.done .check {
+    background: var(--accent);
+    color: white;
+  }
+  li span.text {
+    flex: 1;
+    font-size: 1.05rem;
+    cursor: pointer;
+  }
+  li.done span.text {
+    color: var(--done);
+    text-decoration: line-through;
+  }
+  li .remove {
+    border: none;
+    background: none;
+    color: #b08a6a;
+    font-size: 1.3rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .empty {
+    padding: 30px 4px;
+    color: #8a8071;
+    font-style: italic;
+    text-align: center;
+  }
+  .footer {
+    margin-top: 18px;
+    font-size: 0.85rem;
+    color: #8a8071;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+  <div class="sheet">
+    <h1>Today's list</h1>
+    <div class="date" id="date"></div>
+    <form id="form">
+      <input type="text" id="input" placeholder="Add a task" autocomplete="off">
+      <button type="submit">Add</button>
+    </form>
+    <ul id="list"></ul>
+    <div class="footer" id="count"></div>
+  </div>
+
+<script>
+  const form = document.getElementById('form');
+  const input = document.getElementById('input');
+  const list = document.getElementById('list');
+  const count = document.getElementById('count');
+
+  let tasks = [];
+
+  document.getElementById('date').textContent = new Date().toLocaleDateString(undefined, {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+
+  function render() {
+    list.innerHTML = '';
+    if (tasks.length === 0) {
+      list.innerHTML = '<li class="empty">Nothing here yet. Add your first task above.</li>';
+    } else {
+      tasks.forEach((task, i) => {
+        const li = document.createElement('li');
+        li.className = task.done ? 'done' : '';
+
+        const check = document.createElement('div');
+        check.className = 'check';
+        check.textContent = task.done ? '✓' : '';
+        check.onclick = () => { task.done = !task.done; render(); };
+
+        const text = document.createElement('span');
+        text.className = 'text';
+        text.textContent = task.text;
+        text.onclick = () => { task.done = !task.done; render(); };
+
+        const remove = document.createElement('button');
+        remove.className = 'remove';
+        remove.textContent = '×';
+        remove.onclick = () => { tasks.splice(i, 1); render(); };
+
+        li.appendChild(check);
+        li.appendChild(text);
+        li.appendChild(remove);
+        list.appendChild(li);
+      });
+    }
+    const doneCount = tasks.filter(t => t.done).length;
+    count.textContent = tasks.length ? `${doneCount} of ${tasks.length} done` : '';
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const value = input.value.trim();
+    if (!value) return;
+    tasks.push({ text: value, done: false });
+    input.value = '';
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>
